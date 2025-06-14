@@ -44,12 +44,14 @@ const OptionButton: React.FC<OptionButtonProps> = ({ iconLib, iconName, buttonTi
 
 const styles = StyleSheet.create({
   container: {
-    height: 210,
-    width: 170,
+     height: 180,
+    width: 160,
     backgroundColor: "#9DC0AB",
-    borderRadius: 10,
+    borderRadius: 20, // Plus arrondi comme sur la maquette
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly', // Mieux pour l'espacement vertical
+    padding: 10,
+    position: 'relative', // IMPORTANT: pour que le point soit bien positionné
   },
   topSection: {
     flex: 2,

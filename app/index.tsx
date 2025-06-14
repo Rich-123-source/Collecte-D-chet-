@@ -16,7 +16,7 @@ const Index = () => {
   const renderContent = () => {
     switch (active) {
       case "home":
-        return <Home onNavigate={(screenKey: string) => setActive(screenKey)} />;
+        return <Home onNavigate={(screenKey: string) => setActive(screenKey)} username="kernard TOFA" />;
       case "map":
         return <Map />;
       case "tours":
