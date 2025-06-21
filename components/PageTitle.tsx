@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingVertical: 15,
     paddingHorizontal: 25,
-    margin:0,
+    margin:10,
   },
   pageTitleText: {
     fontFamily: "calibri",

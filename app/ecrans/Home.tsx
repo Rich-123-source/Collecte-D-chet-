@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-evenly",
-    gap: 16,
+    gap: 20,
     paddingBottom: 20,
   },
 });

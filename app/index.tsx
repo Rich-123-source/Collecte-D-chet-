@@ -5,9 +5,9 @@ import CustomNavBar from "../components/CustomNavBar";
 
 // Composants d'écran (renomme bien les fichiers avec majuscules)
 import Home from "./ecrans/Home";
-import Map from "./ecrans/Map";
+import Map from "./ecrans/MapScreen";
 import Tours from "./ecrans/Tours";
-import Stats from "./ecrans/Stats";
+import Stats from "./ecrans/StatsScreen";
 import Profile from "./ecrans/Profile";
 
 const Index = () => {
