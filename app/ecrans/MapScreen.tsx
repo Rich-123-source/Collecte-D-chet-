@@ -1,92 +1,203 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
-import MapView, { Marker, Callout } from "react-native-maps";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import Icon from "react-native-vector-icons/FontAwesome5";
 
-const MapScreen = () => {
+type MarkerData = {
+  id: number;
+  latitude: number;
+  longitude: number;
+  image: any;
+  address: string;
+  type: "urgent" | "non-collecté";
+};
+
+type MapScreenProps = {
+  onVoirPlus?: () => void;
+  setSelectedMarker?: (marker: MarkerData) => void;
+};
+
+const MapScreen: React.FC<MapScreenProps> = ({ onVoirPlus, setSelectedMarker }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
+  const [localSelected, setLocalSelected] = useState<MarkerData | null>(null);
 
-  const markers = [
-    { id: 1, latitude: 6.1642, longitude: 1.2314, image: require("../../assets/images/poubelle1.jpg"), address: "Adidogomé, Rue Palace", type: "urgent" },
-    { id: 2, latitude: 6.1650, longitude: 1.2320, image: require("../../assets/images/poubelle2.jpg"), address: "Tokoin, Marché central", type: "non-collecté" },
+  const markers: MarkerData[] = [
+    {
+      id: 1,
+      latitude: 6.1642,
+      longitude: 1.2314,
+      image: require("../../assets/images/poubelle1.jpg"),
+      address: "Adidogomé, Rue Palace",
+      type: "urgent",
+    },
+    {
+      id: 2,
+      latitude: 6.165,
+      longitude: 1.232,
+      image: require("../../assets/images/poubelle2.jpg"),
+      address: "Tokoin, Marché central",
+      type: "non-collecté",
+    },
   ];
 
-  const filteredMarkers = markers.filter(marker => filter === "all" || marker.type === filter);
+  const filteredMarkers = markers.filter(
+    (marker) => filter === "all" || marker.type === filter
+  );
+
+  const handleVoirPlus = () => {
+    if (localSelected) {
+      setSelectedMarker?.(localSelected);
+      onVoirPlus?.();
+    }
+  };
+
+  const handleMapPress = () => {
+    setLocalSelected(null);
+  };
 
   return (
     <View style={styles.container}>
-      {/* Carte plein écran */}
       <MapView
         style={styles.map}
-        initialRegion={{ latitude: 6.1642, longitude: 1.2314, latitudeDelta: 0.015, longitudeDelta: 0.015 }}
+        initialRegion={{
+          latitude: 6.1642,
+          longitude: 1.2314,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }}
+        onPress={handleMapPress}
       >
-        {filteredMarkers.map(marker => (
-          <Marker key={marker.id} coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}>
-            <Callout>
-              <View style={styles.callout}>
-                <Image source={marker.image} style={styles.image} />
-                <Text style={styles.calloutAddress}>{marker.address}</Text>
-                <TouchableOpacity style={styles.seeMore}>
-                  <Text style={styles.seeMoreText}>Voir plus</Text>
-                </TouchableOpacity>
-              </View>
-            </Callout>
-          </Marker>
+        {filteredMarkers.map((marker) => (
+          <Marker
+            key={marker.id}
+            coordinate={{ latitude: marker.latitude, longitude: marker.longitude }}
+            onPress={() => setLocalSelected(marker)}
+          />
         ))}
       </MapView>
 
-      {/* Options flottantes */}
-      <View style={styles.overlay}>
-        <TextInput
-          placeholder="Rechercher un signalement..."
-          style={styles.searchBar}
-          placeholderTextColor="#888"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
+      <View style={styles.header} pointerEvents="box-none">
+        <Text style={styles.title}>🗺️ Carte des signalements</Text>
+        <View style={styles.searchContainer}>
+          <Icon name="search" size={16} color="#888" style={{ marginRight: 8 }} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Rechercher une zone..."
+            placeholderTextColor="#888"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
 
         <View style={styles.filters}>
-          <TouchableOpacity style={styles.filterButton} onPress={() => setFilter("urgent")}>
-            <Icon name="exclamation-circle" size={20} color="#fff" />
+          <TouchableOpacity
+            style={[styles.filterButton, filter === "urgent" && styles.filterUrgent]}
+            onPress={() => setFilter("urgent")}
+          >
             <Text style={styles.filterText}>Urgent</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton} onPress={() => setFilter("non-collecté")}>
-            <Icon name="trash" size={20} color="#fff" />
+          <TouchableOpacity
+            style={[styles.filterButton, filter === "non-collecté" && styles.filterNonCollecte]}
+            onPress={() => setFilter("non-collecté")}
+          >
             <Text style={styles.filterText}>Non collectés</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.filterButton} onPress={() => setFilter("all")}>
-            <Icon name="list" size={20} color="#fff" />
+          <TouchableOpacity
+            style={[styles.filterButton, filter === "all" && styles.filterAll]}
+            onPress={() => setFilter("all")}
+          >
             <Text style={styles.filterText}>Tous</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {localSelected && (
+        <View style={styles.fiche}>
+          <Image source={localSelected.image} style={styles.ficheImage} />
+          <Text style={styles.ficheAddress}>{localSelected.address}</Text>
+          <TouchableOpacity style={styles.ficheButton} onPress={handleVoirPlus}>
+            <Text style={styles.ficheButtonText}>Voir plus</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  map: { flex: 1 }, // La carte prend toute la hauteur dispo
-  overlay: {
+  map: { flex: 1 },
+  header: {
     position: "absolute",
-    top: 20,
-    left: 10,
-    right: 10,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    padding: 10,
-    borderRadius: 8,
-    elevation: 3,
+    top: 30,
+    left: 16,
+    right: 16,
+    backgroundColor: "#fff",
+    padding: 12,
+    borderRadius: 10,
+    elevation: 5,
+    zIndex: 10,
   },
-  searchBar: { borderWidth: 1, borderColor: "#ccc", borderRadius: 8, padding: 10, backgroundColor: "#fff" },
-  filters: { flexDirection: "row", justifyContent: "space-evenly", paddingVertical: 10 },
-  filterButton: { flexDirection: "row", alignItems: "center", backgroundColor: "#379F67", padding: 10, borderRadius: 8, gap: 6 },
-  filterText: { color: "#fff", fontWeight: "bold" },
-  callout: { width: 200, padding: 8 },
-  image: { width: "100%", height: 90, borderRadius: 8, marginBottom: 6 },
-  calloutAddress: { fontWeight: "bold", marginBottom: 6 },
-  seeMore: { alignSelf: "flex-start", backgroundColor: "#379F67", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
-  seeMoreText: { color: "#fff", fontWeight: "bold" },
+  title: { fontSize: 18, fontWeight: "bold", textAlign: "center", marginBottom: 10 },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f2f2f2",
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  searchInput: { flex: 1, height: 40, fontSize: 14 },
+  filters: { flexDirection: "row", justifyContent: "space-between" },
+  filterButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    paddingVertical: 8,
+    borderRadius: 6,
+    alignItems: "center",
+    backgroundColor: "#ccc",
+  },
+  filterText: { color: "#fff", fontWeight: "bold", fontSize: 12 },
+  filterUrgent: { backgroundColor: "#E74C3C" },
+  filterNonCollecte: { backgroundColor: "#F39C12" },
+  filterAll: { backgroundColor: "#3498DB" },
+
+  fiche: {
+    position: "absolute",
+    bottom: 20,
+    left: 20,
+    right: 20,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 12,
+    elevation: 5,
+    alignItems: "center",
+    zIndex: 20,
+  },
+  ficheImage: {
+    width: "100%",
+    height: 100,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  ficheAddress: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  ficheButton: {
+    backgroundColor: "#379F67",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  ficheButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
 });
 
 export default MapScreen;
