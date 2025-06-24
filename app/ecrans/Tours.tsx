@@ -42,8 +42,17 @@ const Tours = () => {
   };
 
   const startTour = () => {
-    const waypoints = points.map((p) => `${p.latitude},${p.longitude}`).join("|");
-    const url = `https://www.google.com/maps/dir/?api=1&travelmode=driving&waypoints=${waypoints}`;
+    if (points.length < 2) return;
+
+    const origin = `${points[0].latitude},${points[0].longitude}`;
+    const destination = origin; // boucle
+
+    const waypoints = points
+      .slice(1)
+      .map((p) => `${p.latitude},${p.longitude}`)
+      .join("|");
+
+    const url = `https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${origin}&destination=${destination}&waypoints=optimize:true|${waypoints}`;
     setTourStarted(true);
     Linking.openURL(url);
   };
